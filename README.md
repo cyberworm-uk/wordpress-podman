@@ -88,8 +88,8 @@ bash-5.1$ exit
 ```
 
 ## wp-backup.sh
-This script will create a file named `blog-backup.tgz` in the current directory.
-The script will contain two files, one `blog-var-www-html.tar` which containers the wordpress content, the other `blog-db.sql` which is a dump of the wordpress tables for *blog*.
+This script will create a gzip'd tarball archive file named `blog-backup.tgz` in the current directory.
+The archive will contain two files, one `blog-var-www-html.tar` which containers the wordpress content and the other `blog-db.sql` which is a dump of the wordpress database for *blog*.
 The first argument passed to the script should be the name of the pod you're backing up. The *blog* part of the filename will match your pods name.
 
 ```

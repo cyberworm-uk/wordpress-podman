@@ -65,6 +65,10 @@ systemctl restart container-test-nginx
 systemctl disable --now pod-test
 ```
 
+## wp-create-quadlet.sh
+Like `wp-create.sh` except it generates [quadlet units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) to create managable systemd service, rather than using the new deprecated `podman generate systemd ...`
+Files should be places in `/etc/containers/systemd/` to run as root or `$XDG_CONFIG_HOME/containers/systemd/` to run as rootless.
+
 ## wp-mgmt.sh
 This script will create a new container in the specified pod (the default is *blog*) and you will be dropped into a command line inside the container.
 The container is as follows

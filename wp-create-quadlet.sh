@@ -12,8 +12,8 @@ Description=${PREFIX} SQL container
 Image=docker.io/library/mariadb:latest
 AutoUpdate=registry
 
-Volume=${PREFIX}-mariadb.volume:/var/lib/mysql
-PodmanArgs=--secret=${PREFIX}
+Volume=${PREFIX}-sql.volume:/var/lib/mysql
+Secret=${PREFIX}
 Network=${PREFIX}.network
 
 Environment=MARIADB_ROOT_PASSWORD_FILE=/run/secrets/${PREFIX}
@@ -34,7 +34,7 @@ Image=docker.io/library/wordpress:fpm-alpine
 AutoUpdate=registry
 
 Volume=${PREFIX}-wordpress.volume:/var/www/html
-PodmanArgs=--secret=${PREFIX}
+Secret=${PREFIX}
 Network=${PREFIX}.network
 
 Environment=WORDPRESS_DB_HOST=systemd-${PREFIX}-sql
@@ -99,5 +99,5 @@ echo "${SQL_CONTAINER}" > "${PREFIX}-sql.container"
 echo "${WORDPRESS_CONTAINER}" > "${PREFIX}-wordpress.container"
 echo "${NGINX_CONTAINER}" > "${PREFIX}-nginx.container"
 echo "${NGINX_CONFIG}" > $(podman volume inspect -f '{{ .Mountpoint }}' "systemd-${PREFIX}-nginx")/blog.conf
-echo "[Volume]" | tee "${PREFIX}-mariadb.volume" | tee "${PREFIX}-wordpress.volume" | tee "${PREFIX}-nginx.volume"
+echo "[Volume]" | tee "${PREFIX}-sql.volume" | tee "${PREFIX}-wordpress.volume" | tee "${PREFIX}-nginx.volume"
 echo "${NETWORK_CONFIG}" > "${PREFIX}.network"

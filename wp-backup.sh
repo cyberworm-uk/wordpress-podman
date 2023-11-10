@@ -1,22 +1,16 @@
 #!/bin/bash
-function exist_fail() {
-  printf "FAIL: Pod %s doesn't exist\n" "${1}"
-  exit 1
-}
 
 function cleanup() {
-  rm "${1}-db.sql" "${1}-var-www-html.tar"
+  rm "${1}.sql" "${1}-wordpress.tar"
 }
 
 # setup environment variables...
 PREFIX=${1:-blog}
-# check it exists...
-podman pod exists "${PREFIX}" || exist_fail ${PREFIX}
-PASSWORD=`podman exec "${PREFIX}-db" cat "/run/secrets/${PREFIX}-mysql-root"`
+PASSWORD=`podman exec "systemd-${PREFIX}-sql" cat "/run/secrets/${PREFIX}"`
 
 # export database...
-podman exec "${PREFIX}-db" mariadb-dump -uroot -p"${PASSWORD}" --databases blog > "${PREFIX}-db.sql"
+podman exec "systemd-${PREFIX}-sql" mariadb-dump -uroot -p"${PASSWORD}" --databases blog > "${PREFIX}.sql"
 # export wordpress files...
-podman volume export "${PREFIX}-var-www-html" > "${PREFIX}-var-www-html.tar"
+podman volume export "systemd-${PREFIX}-wordpress" -o "${PREFIX}-wordpress.tar"
 # compress exports...
-tar zcf "${PREFIX}-backup.tar.gz" "${PREFIX}-db.sql" "${PREFIX}-var-www-html.tar" && cleanup ${PREFIX}
+tar zcf "${PREFIX}-backup.tar.gz" "${PREFIX}.sql" "${PREFIX}-wordpress.tar" && cleanup ${PREFIX}

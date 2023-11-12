@@ -68,7 +68,7 @@ Restart=always
 TimeoutStartSec=900
 
 [Install]
-WantedBy=multi-user.target"
+WantedBy=default.target"
 
 NGINX_CONFIG="server {
   listen 80;

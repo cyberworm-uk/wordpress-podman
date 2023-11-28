@@ -35,9 +35,19 @@ These units should all be placed in `/etc/containers/systemd` if rootful or `~/.
 
 `systemctl daemon-reload` or `systemctl --user daemon-reload` should allow quadlet to generate the associated service files once they're in place. They will start up automatically next boot. To manually start the service run `systemctl start blog-nginx` (the other containers should start automatically to support it)
 
+Run as `wp-create.sh <PREFIX>`, e.g. `wp-create.sh myblog`
+
 ## wp-mgmt.sh
 
 Spawns an instance of `docker.io/library/wordpress:cli` configured with the settings for the provided prefix.
+
+Run as `wp-mgmt.sh <PREFIX>`, e.g. `wp-mgmt.sh myblog`
+
+## wp-backup.sh
+
+Creates a *blog*-backup.tgz file containing *blog*.sql, a SQL backup of the database, and *blog*-wordpress.tar, a backup of the wordpress volume.
+
+Run as `wp-backup.sh <PREFIX>`, e.g. `wp-backup.sh myblog`
 
 # legacy
 

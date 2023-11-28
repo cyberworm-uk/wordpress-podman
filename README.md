@@ -17,7 +17,7 @@ The three containers are
   - a volume mounted at `/var/www/html` which is the same as mounted on *blog*-fpm
   - a minimal nginx config snippet will be written to `/etc/nginx/conf.d/blog.conf`
 
-At present, we don't automatically publish a port since this would conflict if you were running multiple pods. However, removing the [commented which stops the `--publish` entry being run](https://github.com/guest42069/wordpress-podman/blob/main/wp-create.sh#L26) is a relatively simple task.
+At present, we don't automatically publish a port since this would conflict if you were running multiple pods. However, removing the [commented which stops the `--publish` entry being run](https://github.com/cyberworm-uk/wordpress-podman/blob/main/wp-create.sh#L26) is a relatively simple task.
 
 _WARNING_: It is [relatively common for Wordpress sites in a newly deployed state awaiting installation are hijacked](https://www.wordfence.com/blog/2017/07/hackers-find-wordpress-within-30-mins/) and used to serve spam or malicious content or worse. As such, you may wish to expose the port and put the site online only after the setup is complete.
 

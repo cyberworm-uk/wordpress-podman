@@ -1,7 +1,47 @@
 # wordpress-podman
 Scripts to create, manage and backup Wordpress on Podman.
 
+For non-quadlet scripts, see [legacy](#legacy)
+
 ## wp-create.sh
+
+Creates:
+
+One `.network` unit which all containers are attached to.
+
+Three `.container` units
+- *blog*-wordpress (`docker.io/library/wordpress:fpm-alpine`)
+  - access to the secret
+  - a volume mounted at `/var/www/html` which will contain the wordpress content
+- *blog*-sql (`docker.io/library/mariadb:latest`)
+  - access to the secret
+  - a volume mounted at `/var/lib/mysql` which will contain the database files
+- *blog*-nginx (`docker.io/library/nginx:alpine`)
+  - a volume mounted at `/etc/nginx/conf.d` which contains nginx configuration snippets
+  - a volume mounted at `/var/www/html` which is the same as mounted on *blog*-wordpress
+  - a minimal nginx config snippet will be written to `/etc/nginx/conf.d/default.conf`
+
+Three `.volume` units
+- *blog*-wordpress
+  - used to store wordpress site files and content
+- *blog*-sql
+  - used to store sql database
+- *blog*-nginx
+  - used to store nginx conf snippet(s).
+
+One `secret` containing the SQL password, shared to `wordpress` and `sql`.
+
+These units should all be placed in `/etc/containers/systemd` if rootful or `~/.config/containers/systemd` if rootless.
+
+`systemctl daemon-reload` or `systemctl --user daemon-reload` should allow quadlet to generate the associated service files once they're in place. They will start up automatically next boot. To manually start the service run `systemctl start blog-nginx` (the other containers should start automatically to support it)
+
+## wp-mgmt.sh
+
+Spawns an instance of `docker.io/library/wordpress:cli` configured with the settings for the provided prefix.
+
+# legacy
+
+## wp-create-legacy.sh
 This is a script that will create a pod, 3 containers, 3 volumes and a secret.
 The secret is a randomly generated database password.
 The default pod name is *blog*, otherwise the first argument passed will be used.
@@ -17,14 +57,14 @@ The three containers are
   - a volume mounted at `/var/www/html` which is the same as mounted on *blog*-fpm
   - a minimal nginx config snippet will be written to `/etc/nginx/conf.d/blog.conf`
 
-At present, we don't automatically publish a port since this would conflict if you were running multiple pods. However, removing the [commented which stops the `--publish` entry being run](https://github.com/cyberworm-uk/wordpress-podman/blob/main/wp-create.sh#L26) is a relatively simple task.
+At present, we don't automatically publish a port since this would conflict if you were running multiple pods. However, removing the [commented which stops the `--publish` entry being run](https://github.com/cyberworm-uk/wordpress-podman/blob/main/wp-create-legacy.sh#L26) is a relatively simple task.
 
 _WARNING_: It is [relatively common for Wordpress sites in a newly deployed state awaiting installation are hijacked](https://www.wordfence.com/blog/2017/07/hackers-find-wordpress-within-30-mins/) and used to serve spam or malicious content or worse. As such, you may wish to expose the port and put the site online only after the setup is complete.
 
 In the following examples, the pod name of *test* was used.
 
 ```
-# ./wp-create.sh test
+# ./wp-create-legacy.sh test
 
 # podman pod stats test --no-stream
 POD           CID           NAME                CPU %       MEM USAGE/ LIMIT   MEM %       NET IO       BLOCK IO          PIDS
@@ -65,11 +105,7 @@ systemctl restart container-test-nginx
 systemctl disable --now pod-test
 ```
 
-## wp-create-quadlet.sh
-Like `wp-create.sh` except it generates [quadlet units](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) to create managable systemd service, rather than using the new deprecated `podman generate systemd ...`
-Files should be places in `/etc/containers/systemd/` to run as root or `$XDG_CONFIG_HOME/containers/systemd/` to run as rootless.
-
-## wp-mgmt.sh
+## wp-mgmt-legacy.sh
 This script will create a new container in the specified pod (the default is *blog*) and you will be dropped into a command line inside the container.
 The container is as follows
 - `docker.io/library/wordpress:cli`
@@ -78,7 +114,7 @@ The container is as follows
 The wordpress cli tool can be used for maintenance and house keeping, it can be run with the `wp` command.
 
 ```
-# ./wp-mgmt.sh
+# ./wp-mgmt-legacy.sh
 bash-5.1$ wp core verify-checksums
 Warning: File should not exist: wp-config-docker.php
 Success: WordPress installation verifies against checksums.
@@ -91,13 +127,13 @@ Success: Theme already updated.
 bash-5.1$ exit
 ```
 
-## wp-backup.sh
+## wp-backup-legacy.sh
 This script will create a gzip'd tarball archive file named `blog-backup.tgz` in the current directory.
 The archive will contain two files, one `blog-var-www-html.tar` which containers the wordpress content and the other `blog-db.sql` which is a dump of the wordpress database for *blog*.
 The first argument passed to the script should be the name of the pod you're backing up. The *blog* part of the filename will match your pods name.
 
 ```
-# ./wp-backup.sh
+# ./wp-backup-legacy.sh
 # tar vtaf blog-backup.tgz
 -rw-r--r-- root/root   1326009 2023-09-13 08:44 blog-db.sql
 -rw-r--r-- root/root  97610240 2023-09-13 08:44 blog-var-www-html.tar
@@ -121,4 +157,4 @@ And to restore the database from the .sql file
 # podman exec -i blog-db mariadb -u root --password=${PASSWORD} < blog-db.sql
 ```
 
-I may add a wp-restore.sh eventually to automate recreating and restoring, but simply running create again followed by the above steps should suffice and would also be suitable for migrations.
+I may add a wp-restore-legacy.sh eventually to automate recreating and restoring, but simply running create again followed by the above steps should suffice and would also be suitable for migrations.

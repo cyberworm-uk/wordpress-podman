@@ -60,6 +60,9 @@ Volume=${PREFIX}-wordpress.volume:/var/www/html
 Volume=${PREFIX}-nginx.volume:/etc/nginx/conf.d
 Network=${PREFIX}.network
 
+# uncomment the line below to make wordpress reachable on port 80 externally...
+#PublishPort=80:80/tcp
+
 Environment=MARIADB_ROOT_PASSWORD_FILE=/run/secrets/${PREFIX}
 Environment=MARIADB_DATABASE=blog
 
